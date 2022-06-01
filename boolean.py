@@ -18,14 +18,16 @@ unique_words = set()
 for file in glob.glob('short/*'):
     file = open(file, 'r')
     words = set(file.read().split())
+    file.close()
     unique_words = unique_words.union(words)
 
 docs = []
 
 for file in glob.glob('short/*'):
     doc = {'DOCUMENT_NAME': file[6:]}
-    file = open(file, "r")
+    file = open(file, 'r')
     words = set(file.read().split())
+    file.close()
 
     for word in unique_words:
         if word in words:
@@ -34,7 +36,6 @@ for file in glob.glob('short/*'):
             doc[word] = 0
 
     docs.append(doc)
-    words = set(file.read().split())
     unique_words = unique_words.union(words)
 
 columns = ['DOCUMENT_NAME'] + list(unique_words)
