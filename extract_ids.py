@@ -96,6 +96,6 @@ s = input()
 items = crawl(s)
 f = open("output.txt", "a")
 for item in items:
-    f.write("{} {}\n".format(item[0], item[1]))
+    f.write("{}\t\t{}\n".format(item[0], item[1]))
 f.close()
 
