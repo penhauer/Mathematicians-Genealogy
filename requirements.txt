@@ -3,3 +3,4 @@ requests
 nltk
 pandas
 tqdm
+scikit-learn
