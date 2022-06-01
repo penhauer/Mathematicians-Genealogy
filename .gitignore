@@ -130,3 +130,7 @@ dmypy.json
 
 # JetBrains
 .idea/
+
+
+# crawling info
+names-and-ids/*
