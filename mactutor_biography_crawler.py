@@ -13,7 +13,6 @@ regex = re.compile(r'[^a-z\s]')
 punctuation = re.compile('[' + string.punctuation + ']')
 porter = PorterStemmer()
 
-
 for line in sys.stdin:
     current_url = line.strip().split(';')[2].strip()
     url = urllib.request.urlopen(current_url)
@@ -28,7 +27,6 @@ for line in sys.stdin:
         text = re.sub(regex, '', text)
         words = word_tokenize(text)
         words = [word for word in words if len(word) > 1]
-        words = [word for word in words if not word.startswith('http')]
         stop_words = stopwords.words('english')
         words = [word for word in words if word not in stop_words]
         stems = [porter.stem(word) for word in words]
