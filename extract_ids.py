@@ -82,8 +82,12 @@ def crawl_char_by_char(prefix):
         return extract_info_from_leaf_page(text)
 
 def crawl_by_search(prefix):
-    text = search_family_name_prefix(prefix)
-    return extract_info_from_leaf_page(text)
+    try:
+        text = search_family_name_prefix(prefix)
+        return extract_info_from_leaf_page(text)
+    except e:
+        print(e)
+        return []
 
 
 def write_to_file(prefix, items):
@@ -101,7 +105,7 @@ def f(prefix):
 
 def run():
     prefixes = [c1 + c2 for c1 in string.ascii_uppercase for c2 in string.ascii_uppercase]
-    pool = Pool(processes=20)
+    pool = Pool(processes=30)
     pool.map(f, prefixes)
 
 run()
