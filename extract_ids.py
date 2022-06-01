@@ -58,7 +58,7 @@ def crawl(prefix):
 
 def crawl_and_write_to_file(prefix):
     items = crawl(prefix)
-    f = open(f"{prefix}.txt", "a")
+    f = open(f"./names-and-ids/{prefix}.txt", "a")
     for item in items:
         f.write("{}\t\t{}\n".format(item[0], item[1]))
     f.close()
@@ -67,5 +67,5 @@ def crawl_and_write_to_file(prefix):
 
 prefix = input()
 prefixes = list(map(lambda c: prefix + c, string.ascii_uppercase))
-pool = Pool(processes=6)
+pool = Pool(processes=20)
 pool.map(crawl_and_write_to_file, prefixes)
