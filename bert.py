@@ -6,16 +6,16 @@ import numpy as np
 from numpy import linalg as LA
 
 from nltk import sent_tokenize
-from bert_serving.client import BertClient
+from sentence_transformers import SentenceTransformer
 
 MODEL_FILENAME = 'fasttext_model.bin'
-VECTOR_SIZE = 100
+VECTOR_SIZE = 384
 
 
-def get_biography_vector(filname: str, model: BertClient) -> np.ndarray:
+def get_biography_vector(filename: str, model: SentenceTransformer) -> np.ndarray:
     res = np.array([0] * VECTOR_SIZE).astype('float64')
     length = 0
-    with open(f'./short/{filname}', 'r') as f:
+    with open(f'./short/{filename}', 'r') as f:
         for line in f:
             for sent in sent_tokenize(line):
                 vector = model.encode([sent])[0]
@@ -24,11 +24,11 @@ def get_biography_vector(filname: str, model: BertClient) -> np.ndarray:
     return res / length
 
 
-def get_biographies_vector(model: BertClient) -> Dict[str, np.ndarray]:
+def get_biographies_vector(model: SentenceTransformer) -> Dict[str, np.ndarray]:
     res = dict()
     filenames = listdir('./short/')
     for filename in filenames:
-        v = get_biography_vector(filname=filename, model=model)
+        v = get_biography_vector(filename=filename, model=model)
         res[filename] = v
     return res
 
@@ -52,7 +52,7 @@ def get_most_relevant_mathematicians(similarities: List[Tuple[float, str]], numb
 
 
 if __name__ == '__main__':
-    model = BertClient()
+    model = SentenceTransformer('all-MiniLM-L6-v2')
     INPUT = input('Enter your term: ')
     word_vector = model.encode([INPUT])[0]
     biography_vectors = get_biographies_vector(model=model)
