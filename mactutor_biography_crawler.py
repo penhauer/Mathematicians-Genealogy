@@ -13,8 +13,10 @@ regex = re.compile(r'[^a-z\s]')
 punctuation = re.compile('[' + string.punctuation + ']')
 porter = PorterStemmer()
 
-prep = input('Should I preprocess? y/n')
-prep = prep == 'y'
+prep = False
+if len(sys.argv) > 1:
+    prep = sys.argv[1] == 'y'
+print(prep)
 
 for line in sys.stdin:
     current_url = line.strip().split(';')[2].strip()
@@ -35,9 +37,11 @@ for line in sys.stdin:
             stop_words = stopwords.words('english')
             words = [word for word in words if word not in stop_words]
             stems = [porter.stem(word) for word in words]
+            stems = ' '.join(stems)
+            text = stems
 
         print(name)
         file = open(f'texts/{name}', 'w+')
-        file.write(' '.join(stems))
+        file.write(text)
         file.close()
         print()
