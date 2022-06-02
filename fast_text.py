@@ -25,12 +25,14 @@ def create_model():
 
 def get_biography_vector(filname: str, model: fasttext.FastText._FastText) -> np.ndarray:
     res = np.array([0] * VECTOR_SIZE).astype('float64')
+    length = 0
     with open(f'./short/{filname}', 'r') as f:
         for line in f:
             for word in line.split():
+                length += 1
                 vector = model.get_word_vector(word)
                 res += vector
-    return res
+    return res / length
 
 def get_biographies_vector(model: fasttext.FastText._FastText) -> Dict[str, np.ndarray]:
     res = dict()
@@ -51,7 +53,7 @@ def get_similarities(word: np.ndarray, vectors: Dict[str, np.ndarray]) -> List[T
 
     return res
 
-def get_most_relevant_mathematicians(similarities: np.ndarray, number_of_mathematicians: int = 5):
+def get_most_relevant_mathematicians(similarities: List[Tuple[float, str]], number_of_mathematicians: int = 5):
     res = sorted(similarities, key = lambda x: x[0])[-number_of_mathematicians:]
     res.reverse()
     return [name for _, name in res]
