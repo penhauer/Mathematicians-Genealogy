@@ -9,7 +9,19 @@ import itertools
 from multiprocessing import Pool
 
 
-link = 'https://www.genealogy.math.ndsu.nodak.edu/letter.php?letter={}'
+id_link = 'https://www.genealogy.math.ndsu.nodak.edu/id.php?id={}'
+prefix_link = 'https://www.genealogy.math.ndsu.nodak.edu/letter.php?letter={}'
+
+
+def get_page_with_id(identifier):
+    response = requests.get(id_link.format(identifier))
+    return response.text
+
+
+
+def get_students_from_page():
+    soup = BeautifulSoup(text, 'html.parser')
+    rows = soup.body.find('table').find_all('tr')
 
 
 
@@ -40,7 +52,7 @@ def search_family_name_prefix(prefix):
 
 
 def get_with_prefix(prefix):
-    r = requests.get(link.format(prefix))
+    r = requests.get(prefix_link.format(prefix))
     return r.text
 
 
@@ -108,4 +120,15 @@ def run():
     pool = Pool(processes=30)
     pool.map(f, prefixes)
 
-run()
+
+def get_students_from_page(identifier):
+    text = get_page_with_id(identifier)
+    soup = BeautifulSoup(text, 'html.parser')
+    rows = soup.body.find('table').find_all('tr')
+    return list(map(get_info_from_row, rows[1:]))
+
+
+
+if __name__ == "__main__":
+    run()
+
