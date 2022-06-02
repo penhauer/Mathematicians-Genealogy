@@ -25,8 +25,9 @@ for line in sys.stdin:
     name = soup.main.div.text.strip().replace(' ', '_')
 
     if name:
+        text = soup.main.get_text()
         if prep:
-            text = soup.main.get_text().lower()
+            text = text.lower()
             text = re.sub(punctuation, ' ', text)
             text = re.sub(regex, '', text)
             words = word_tokenize(text)
