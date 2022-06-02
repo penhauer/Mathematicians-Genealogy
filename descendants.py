@@ -112,7 +112,7 @@ def prompt_for_best(best_candidates):
     for i, candidate in enumerate(best_candidates):
         print(i + 1, " ->", candidate[1])
 
-    ind = int(input("enter index of best mathmatician you want"))
+    ind = int(input("enter index of best mathmatician you want\n"))
     return best_candidates[ind - 1][1]
 
 
