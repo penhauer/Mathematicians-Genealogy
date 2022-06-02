@@ -5,3 +5,5 @@ pandas
 tqdm
 unidecode
 scikit-learn
+numpy
+fasttext

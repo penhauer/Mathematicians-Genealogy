@@ -134,3 +134,6 @@ dmypy.json
 
 # crawling info
 names-and-ids/*
+short/*
+*.bin
+merged.txt
