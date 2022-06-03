@@ -4,6 +4,7 @@ import glob
 
 import pandas as pd
 
+from typing import List
 from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
 from nltk import word_tokenize
@@ -14,7 +15,7 @@ stop_words = stopwords.words('english')
 stemmer = PorterStemmer()
 
 
-def preprocess(text: str) -> list[str]:
+def preprocess(text: str) -> List[str]:
     text = text.lower()
     text = re.sub(punctuation, ' ', text)
     text = re.sub(nonstandard, '', text)
