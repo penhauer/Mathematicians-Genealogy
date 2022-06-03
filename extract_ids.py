@@ -123,6 +123,8 @@ def run():
 
 def get_students_from_page(identifier):
     text = get_page_with_id(identifier)
+    if "No students known" in text:
+        return []
     soup = BeautifulSoup(text, 'html.parser')
     rows = soup.body.find('table').find_all('tr')
     return list(map(get_info_from_row, rows[1:]))

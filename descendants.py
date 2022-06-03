@@ -122,8 +122,11 @@ def run():
     mathmatician = prompt_for_best(best_candidates)
     print(mathmatician.identifier)
     students = get_students_from_page(mathmatician.identifier)
-    for student in students:
-        print(student[0], student[1])
+    if students:
+        for student in students:
+            print(student[0], student[1])
+    else:
+        print("No students known.")
 
 
 run()
