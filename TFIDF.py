@@ -2,6 +2,7 @@ import re
 import string
 import glob
 
+from typing import List
 from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -14,7 +15,7 @@ stop_words = stopwords.words('english')
 stemmer = PorterStemmer()
 
 
-def preprocess(text: str) -> list[str]:
+def preprocess(text: str) -> List[str]:
     text = text.lower()
     text = re.sub(punctuation, ' ', text)
     text = re.sub(nonstandard, '', text)
