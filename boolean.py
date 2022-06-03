@@ -22,6 +22,7 @@ def preprocess(text: str) -> list[str]:
     text = [token for token in text if len(token) > 1]
     text = [token for token in text if token not in stop_words]
     text = [stemmer.stem(token) for token in text]
+    text = [token for token in text if token in unique_words]
     return text
 
 
