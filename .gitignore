@@ -137,3 +137,4 @@ names-and-ids/*
 short/*
 *.bin
 merged.txt
+raw/*
