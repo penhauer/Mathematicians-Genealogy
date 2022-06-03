@@ -5,8 +5,8 @@ import glob
 import pandas as pd
 
 from nltk.stem.porter import PorterStemmer
-from nltk import word_tokenize
 from nltk.corpus import stopwords
+from nltk import word_tokenize
 
 punctuation = re.compile('[' + string.punctuation + ']')
 nonstandard = re.compile(r'[^a-z\s]')
@@ -14,7 +14,7 @@ stop_words = stopwords.words('english')
 stemmer = PorterStemmer()
 
 
-def preprocess(text: str):
+def preprocess(text: str) -> list[str]:
     text = text.lower()
     text = re.sub(punctuation, ' ', text)
     text = re.sub(nonstandard, '', text)
@@ -27,17 +27,17 @@ def preprocess(text: str):
 
 unique_words = set()
 
-for file in glob.glob('short/*'):
-    file = open(file, 'r')
+for filename in glob.glob('short/*'):
+    file = open(filename, 'r')
     words = set(file.read().split())
     file.close()
     unique_words = unique_words.union(words)
 
 docs = []
 
-for file in glob.glob('short/*'):
-    doc = {'DOCUMENT_NAME': file[6:]}
-    file = open(file, 'r')
+for filename in glob.glob('short/*'):
+    doc = {'DOCUMENT_NAME': filename[6:]}
+    file = open(filename, 'r')
     words = set(file.read().split())
     file.close()
 
