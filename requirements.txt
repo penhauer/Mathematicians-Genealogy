@@ -2,7 +2,6 @@ beautifulsoup4
 requests
 nltk
 pandas
-tqdm
 unidecode
 scikit-learn
 numpy
