@@ -18,8 +18,15 @@ if len(sys.argv) > 1:
     prep = sys.argv[1] == 'y'
 print(prep)
 
+ids_dict = {}
+with open('ids.txt', 'r') as f:
+    for line in f:
+        person = line.strip().split('\t')
+        ids_dict[person[1]] = person[0]
+
 for line in sys.stdin:
     current_url = line.strip().split(';')[2].strip()
+    current_person = line.strip().split(';')[0].strip()
     url = urllib.request.urlopen(current_url)
     content = url.read()
     soup = BeautifulSoup(content, 'lxml')
@@ -41,7 +48,10 @@ for line in sys.stdin:
             text = stems
 
         print(name)
-        file = open(f'texts/{name}', 'w+')
+        fname = name
+        if current_person in ids_dict:
+            fname = ids_dict[current_person]
+        file = open(f'id_texts/{fname}', 'w+')
         file.write(text)
         file.close()
         print()
