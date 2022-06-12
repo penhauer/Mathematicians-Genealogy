@@ -4,7 +4,7 @@ while read -r line
 do
 	name=$(echo ${line} | awk -F';' '{print $1}')
 	name=$(echo -e "${name}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-	uni=$(ggrep -m 1 -P "\t\t${name}\t\t" names-and-ids/sorted.txt)
+	uni=$(grep -m 1 -P "\t\t${name}\t\t" all_mathematicians.txt)
 	if [ -n "$uni" ]; then
 		echo "${uni}"
 	fi

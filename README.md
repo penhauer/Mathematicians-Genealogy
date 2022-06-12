@@ -1,1 +1,1 @@
-# US-Mathmeticians-Genealogy
+# US-Mathematicians-Genealogy
