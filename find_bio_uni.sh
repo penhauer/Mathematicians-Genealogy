@@ -6,6 +6,6 @@ do
 	name=$(echo -e "${name}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 	uni=$(ggrep -m 1 -P "\t${name}\t" names-and-ids/sorted.txt)
 	if [ -n "$uni" ]; then
-		echo ${uni}
+		echo "${uni}"
 	fi
 done < ${input}
