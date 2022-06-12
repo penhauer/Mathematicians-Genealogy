@@ -1,7 +1,6 @@
 #!./venv/bin/python3
 
 import unidecode
-import re
 from .extract_ids import get_students_from_page
 from .Mathematician import Mathematician
 
@@ -31,18 +30,13 @@ def extract_names_and_family_names():
     lines = get_file_lines()
     for line in lines:
         identifier, full_name, university = line.split("\t\t")
-        full_name = normalize(full_name) 
+        full_name = normalize(full_name)
         splits = full_name.split(',')
         first_name = splits[-1].strip()
         last_name = splits[0].strip()
 
         mathematician = Mathematician(identifier=identifier, first_name=first_name, last_name=last_name, full_name=full_name, university=university)
         mathematicians.append(mathematician)
-
-        m = re.match(".*,.*,.*", full_name)
-        if m:
-            pass
-            # print(identifier, full_name)
 
     return mathematicians
 
@@ -68,8 +62,10 @@ def levenstein_distance(a, b):
 
 
 def find_best_matches(first_name, last_name, mathematicians):
-    f = lambda mathematician: levenstein_distance(mathematician.first_name, first_name) + levenstein_distance(mathematician.last_name, last_name)
-    g = lambda mathematician: (f(mathematician), mathematician)
+    dis = lambda mathematician: \
+        levenstein_distance(mathematician.first_name, first_name) + \
+        levenstein_distance(mathematician.last_name, last_name)
+    g = lambda mathematician: (dis(mathematician), mathematician)
 
     candidates = list(sorted(map(g, mathematicians)))
     return candidates[0:K]
@@ -77,7 +73,7 @@ def find_best_matches(first_name, last_name, mathematicians):
 
 def get_full_name():
     full_name = input("enter first name and last name seperated with a comma\n")
-    if not ',' in full_name:
+    if ',' not in full_name:
         print("you entered no ','")
         print("exiting")
         exit(1)
