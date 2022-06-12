@@ -86,7 +86,10 @@ def get_mathmatician_from_row(row):
 
 def extract_info_from_leaf_page(text):
     soup = BeautifulSoup(text, 'html.parser')
-    rows = soup.body.find('table').find_all('tr')
+    rows = soup.body.find('table')
+    if rows is None:
+        return []
+    rows = rows.find_all('tr')
     return list(map(get_mathmatician_from_row, rows))
 
 
