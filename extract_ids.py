@@ -7,6 +7,7 @@ import string
 import re
 import itertools
 from multiprocessing import Pool
+from Mathmatician import Mathmatician
 
 
 id_link = 'https://www.genealogy.math.ndsu.nodak.edu/id.php?id={}'
@@ -68,20 +69,25 @@ def get_name_from_link(link):
     return link.string
 
 
-def get_info_from_row(row):
+def get_university_from_col(col):
+    return col.text
+
+def get_mathmatician_from_row(row):
     cols = row.find_all('td') 
 
     link = cols[0].find('a')
     id = get_id_from_link(link) 
     name = get_name_from_link(link)
-    print(name, id)
-    return id, name 
+    university = get_university_from_col(cols[1])
+    mathmatician = Mathmatician(identifier=id, full_name=name, university=university)
+    # print(f"{id}\t\t{name}\t\t{university}")
+    return mathmatician
 
 
 def extract_info_from_leaf_page(text):
     soup = BeautifulSoup(text, 'html.parser')
     rows = soup.body.find('table').find_all('tr')
-    return list(map(get_info_from_row, rows))
+    return list(map(get_mathmatician_from_row, rows))
 
 
 def crawl_char_by_char(prefix):
@@ -90,7 +96,7 @@ def crawl_char_by_char(prefix):
     if not prefix or more_depth_is_needed(text):
         return list(itertools.chain.from_iterable(map(lambda c: crawl(prefix + c), string.ascii_uppercase)))
     else:
-        print(f"searching leaf {prefix}")
+        # print(f"searching leaf {prefix}")
         return extract_info_from_leaf_page(text)
 
 def crawl_by_search(prefix):
@@ -102,15 +108,15 @@ def crawl_by_search(prefix):
         return []
 
 
-def write_to_file(prefix, items):
+def write_to_file(prefix, mathmaticians):
     f = open(f"./names-and-ids/{prefix}.txt", "a")
-    for item in items:
-        f.write("{}\t\t{}\n".format(item[0], item[1]))
+    for mathmatician in mathmaticians:
+        f.write("{}\t\t{}\t\t{}\n".format(mathmatician.identifier, mathmatician.full_name, mathmatician.university))
     f.close()
 
 def crawl_and_write_to_file(crawler, prefix):
-    items = crawler(prefix)
-    write_to_file(prefix, items)
+    mathmaticians = crawler(prefix)
+    write_to_file(prefix, mathmaticians)
 
 def f(prefix):
     crawl_and_write_to_file(crawl_by_search, prefix)
@@ -127,7 +133,7 @@ def get_students_from_page(identifier):
         return []
     soup = BeautifulSoup(text, 'html.parser')
     rows = soup.body.find('table').find_all('tr')
-    return list(map(get_info_from_row, rows[1:]))
+    return list(map(get_mathmatician_from_row, rows[1:]))
 
 
 

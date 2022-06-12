@@ -5,25 +5,10 @@ import nltk
 import unidecode
 import re
 from extract_ids import get_students_from_page
+from Mathmatician import Mathmatician
 
 
 K = 5
-
-
-class Mathmatician():
-
-    def __init__(self, identifier, first_name, last_name):
-        self.identifier = identifier
-        self.first_name = first_name
-        self.last_name = last_name
-
-    def __lt__(self, mat):
-        if mat.last_name != self.last_name:
-            return self.first_name < mat.first_name
-        return self.last_name < mat.last_name
-    
-    def __str__(self):
-        return f"{self.last_name}, {self.first_name}"
 
 
 def normalize(word):
@@ -45,13 +30,13 @@ def extract_names_and_family_names():
     mathmaticians = []
     lines = get_file_lines()
     for line in lines:
-        identifier, full_name = line.split("\t\t")
+        identifier, full_name, university = line.split("\t\t")
         full_name = normalize(full_name) 
         splits = full_name.split(',')
         first_name = splits[-1].strip()
         last_name = splits[0].strip()
 
-        mathmatician = Mathmatician(identifier, first_name, last_name)
+        mathmatician = Mathmatician(identifier=identifier, first_name=first_name, last_name=last_name, full_name=full_name, university=university)
         mathmaticians.append(mathmatician)
 
         m = re.match(".*,.*,.*", full_name)
@@ -124,7 +109,7 @@ def run():
     students = get_students_from_page(mathmatician.identifier)
     if students:
         for student in students:
-            print(student[0], student[1])
+            print(student)
     else:
         print("No students known.")
 
