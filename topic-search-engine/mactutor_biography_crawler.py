@@ -1,3 +1,4 @@
+from enum import Enum
 import re
 import string
 import sys
@@ -9,49 +10,84 @@ from bs4 import BeautifulSoup
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 
-regex = re.compile(r'[^a-z\s]')
-punctuation = re.compile('[' + string.punctuation + ']')
-porter = PorterStemmer()
 
-prep = False
-if len(sys.argv) > 1:
-    prep = sys.argv[1] == 'y'
-print(prep)
+def get_summary(url: str):
+    url = urllib.request.urlopen(url)
+    content = url.read()
+    soup = BeautifulSoup(content, 'lxml')
+    res = soup.find_all('span', {'class': 'markup'})[0]
+    return res.text
 
-ids_dict = {}
-with open('ids.txt', 'r') as f:
-    for line in f:
-        person = line.strip().split('\t')
-        ids_dict[person[1]] = person[0]
+def get_all(url: str):
+    content = url.read()
+    soup = BeautifulSoup(content, 'lxml')
+    text = soup.main.get_text()
+    return text
 
-for line in sys.stdin:
-    current_url = line.strip().split(';')[2].strip()
-    current_person = line.strip().split(';')[0].strip()
-    url = urllib.request.urlopen(current_url)
+def get_name(url: str):
+    url = urllib.request.urlopen(url)
     content = url.read()
     soup = BeautifulSoup(content, 'lxml')
 
     name = soup.main.div.text.strip().replace(' ', '_')
+    return name
 
-    if name:
-        text = soup.main.get_text()
-        if prep:
-            text = text.lower()
-            text = re.sub(punctuation, ' ', text)
-            text = re.sub(regex, '', text)
-            words = word_tokenize(text)
-            words = [word for word in words if len(word) > 1]
-            stop_words = stopwords.words('english')
-            words = [word for word in words if word not in stop_words]
-            stems = [porter.stem(word) for word in words]
-            stems = ' '.join(stems)
-            text = stems
+def preprocess(text: str):
+    text = text.lower()
+    text = re.sub(punctuation, ' ', text)
+    text = re.sub(regex, '', text)
+    words = word_tokenize(text)
+    words = [word for word in words if len(word) > 1]
+    stop_words = stopwords.words('english')
+    words = [word for word in words if word not in stop_words]
+    stems = [porter.stem(word) for word in words]
+    stems = ' '.join(stems)
+    text = stems
 
-        print(name)
-        fname = name
-        if current_person in ids_dict:
-            fname = ids_dict[current_person]
-        file = open(f'id_texts/{fname}', 'w+')
-        file.write(text)
-        file.close()
-        print()
+    return text
+
+class ParsingMode(Enum):
+    SIMPLE = 1
+    SUMMARY = 2
+
+PARSING_MODE = ParsingMode.SUMMARY
+OUTPUT_DIR = 'summary_texts'
+
+if __name__ == "__main__":
+    regex = re.compile(r'[^a-z\s]')
+    punctuation = re.compile('[' + string.punctuation + ']')
+    porter = PorterStemmer()
+
+    prep = False
+    if len(sys.argv) > 1:
+        prep = sys.argv[1] == 'y'
+    print(f'preprocess: {prep}')
+
+    ids_dict = {}
+    with open('ids.txt', 'r') as f:
+        for line in f:
+            person = line.strip().split('\t')
+            ids_dict[person[1]] = person[0]
+
+    for line in sys.stdin:
+        url = line.strip().split(';')[2].strip()
+        current_person = line.strip().split(';')[0].strip()
+        name = get_name(url)
+
+        if name:
+            if PARSING_MODE == ParsingMode.SIMPLE:
+                text = get_all(url)
+            elif PARSING_MODE == ParsingMode.SUMMARY:
+                text = get_summary(url)
+
+            if prep:
+                text = preprocess(text)
+
+            print(name)
+            fname = name
+            if current_person in ids_dict:
+                fname = ids_dict[current_person]
+            file = open(f'{OUTPUT_DIR}/{fname}', 'w+')
+            file.write(text)
+            file.close()
+            print()
