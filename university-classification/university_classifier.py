@@ -1,29 +1,48 @@
 import os
 import re
 import random
-from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 import unidecode
 
-all_mathematicians_file_path = "../students-finder-engine/all_mathematicians.txt"
-id_files_path = "./id_texts"
+all_mathematicians_file_path = "all_mathematicians.txt"
+id_files_path = "./processed_id_texts"
 
 university_dict = {}
+reputable_universities = []
 
 
 def list_id_file_names():
     id_file_names = list(filter(lambda x: re.match(r"\d+", x), os.listdir(id_files_path)))
-    # only the ones that are found in all_mathematicians.txt
-    x = list(filter(lambda identifier: find_university_for_id(identifier) is not None, id_file_names))
+    x = list(filter(is_good_id, id_file_names))
     print(len(x), len(id_file_names))
     return x
 
 
+def is_good_id(identifier):
+    university_name = find_university_for_id(identifier)
+    if university_name is None:
+        return False
+    return university_name in reputable_universities
+
+
+def normalize(word):
+    word = unidecode.unidecode(word)
+    word = word.lower()
+    return word
+
+
+def load_reputable_universities():
+    file = open("./pruned-unis.txt", "r")
+    global reputable_universities
+    reputable_universities = list(map(normalize, file.readlines()))
+    file.close()
+
+
 def establish_train_and_test_set(id_files):
     id_files_count = len(id_files)
-    train_set = random.sample(population=id_files, k=1100)
+    train_set = random.sample(population=id_files, k=600)
     test_set = set(id_files) - set(train_set)
     return train_set, test_set
 
@@ -37,15 +56,17 @@ def load_university_dict():
     file = open(all_mathematicians_file_path, "r")
     for line in file.readlines():
         items = line.split("\t\t")
-        university = items[2]
-        university.strip()
-        university = university.lower()
-        university = unidecode.unidecode(university)
+        university = normalize(items[2])
         university_dict[items[0]] = university
+    file.close()
 
 
 def find_university_for_id(identifier):
-    return university_dict[identifier] if identifier in university_dict else None
+    if identifier not in university_dict:
+        return None
+
+    university_name = university_dict[identifier]
+    return university_name
 
 
 count_vector = None
@@ -80,11 +101,11 @@ def test(file_names, classifier):
     predicted_universities = classifier.predict(x_new_tfidf)
     l = list(filter(lambda x: x[0] != x[1], zip(real_universities, predicted_universities)))
     print(len(l) / len(real_universities) * 100)
-    print(real_universities, )
 
 
 def run():
     load_university_dict()
+    load_reputable_universities()
     id_file_names = list_id_file_names()
     train_set, test_set = establish_train_and_test_set(id_file_names)
     classifier = train(train_set)

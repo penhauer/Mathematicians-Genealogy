@@ -1,8 +1,6 @@
-#!./venv/bin/python3
-
 import unidecode
-from .extract_ids import get_students_from_page
-from .Mathematician import Mathematician
+from extract_ids import get_students_from_page
+from Mathematician import Mathematician
 
 
 K = 5

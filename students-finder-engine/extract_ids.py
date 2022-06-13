@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import string
 import itertools
 from multiprocessing import Pool
-from .Mathematician import Mathematician
+from Mathematician import Mathematician
 
 id_link = 'https://www.genealogy.math.ndsu.nodak.edu/id.php?id={}'
 prefix_link = 'https://www.genealogy.math.ndsu.nodak.edu/letter.php?letter={}'
