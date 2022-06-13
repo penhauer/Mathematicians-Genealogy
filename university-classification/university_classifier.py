@@ -55,7 +55,6 @@ tfidf_transformer = None
 def train(file_names):
     biographies = list(map(get_file_as_str, file_names))
     universities = list(map(find_university_for_id, file_names))
-    print(universities)
 
     global count_vector
     global tfidf_transformer
