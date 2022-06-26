@@ -8,6 +8,8 @@ import fasttext
 import numpy as np
 from numpy import int32, linalg as LA
 
+from test import do_ranking
+
 DATA_DIR = './../topic-search-engine/summary_texts/'
 MODEL_FILENAME = 'fasttext_model_summary.bin'
 VECTOR_SIZE = 100
@@ -111,14 +113,16 @@ if __name__ == '__main__':
     # #     word_vector = model.get_word_vector(query)
 
     filenames = get_file_names(DATA_DIR)
-    matrix = np.zeros(len(filenames) ** 2).astype(int32)
-    matrix = matrix.reshape(len(filenames), len(filenames))
+    MATRIX_SIZE = 100
+    matrix = np.zeros(len(filenames[:MATRIX_SIZE]) ** 2).astype(int32)
+    matrix = matrix.reshape(len(filenames[:MATRIX_SIZE]), len(filenames[:MATRIX_SIZE]))
 
-    for i, filename1 in enumerate(filenames):
-        for j, filename2 in enumerate(filenames):
+    for i, filename1 in enumerate(filenames[:MATRIX_SIZE]):
+        for j, filename2 in enumerate(filenames[:MATRIX_SIZE]):
             if i == j:
                 continue
             s = get_similaritiy_common_word(filename1, filename2)
             if s > 5:
                 matrix[i][j] = 1
     print(matrix)
+    do_ranking(matrix)
