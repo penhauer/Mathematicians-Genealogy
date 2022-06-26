@@ -8,3 +8,7 @@ numpy
 fasttext
 sentence-transformers
 lxml
+networkx
+scikit-network
+IPython
+matplotlib
