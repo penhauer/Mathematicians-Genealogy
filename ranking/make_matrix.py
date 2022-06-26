@@ -16,7 +16,7 @@ from numpy import int32, linalg as LA
 
 from ranking import do_ranking
 
-DATA_DIR = './topic-search-engine/summary_texts/'
+DATA_DIR = './summary_texts/'
 PREPROCESSED_DATA_DIR = './preprocessed_data/'
 MODEL_FILENAME = 'fasttext_model_summary.bin'
 VECTOR_SIZE = 100
@@ -167,7 +167,7 @@ if __name__ == '__main__':
             if i == j:
                 continue
             s = get_similaritiy_common_word(filename1, filename2, False)
-            if s > 4:
+            if s > 6    :
                 matrix[i][j] = 1
     print(matrix)
     do_ranking(matrix)
