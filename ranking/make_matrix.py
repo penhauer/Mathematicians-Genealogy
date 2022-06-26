@@ -1,8 +1,14 @@
-import os
+from asyncore import read
+import os, re
 from typing import List, Set
 from os.path import isfile
 from os import listdir
 from typing import Dict, List, Tuple
+import string
+
+from nltk.stem.porter import PorterStemmer
+from nltk import word_tokenize
+from nltk.corpus import stopwords
 
 import fasttext
 import numpy as np
@@ -11,6 +17,7 @@ from numpy import int32, linalg as LA
 from test import do_ranking
 
 DATA_DIR = './../topic-search-engine/summary_texts/'
+PREPROCESSED_DATA_DIR = './preprocessed_data/'
 MODEL_FILENAME = 'fasttext_model_summary.bin'
 VECTOR_SIZE = 100
 
@@ -73,13 +80,23 @@ def get_similarities(word: np.ndarray, vectors: Dict[str, np.ndarray]) -> List[T
 
     return res
 
-def get_similaritiy_common_word(filename1: str, filename2:str):
-    with open(f'{DATA_DIR}{filename1}', 'r') as f1:
-        with open(f'{DATA_DIR}{filename2}', 'r') as f2:
-            content1 = f1.read()
-            content2 = f2.read()
-            commons = get_common_words(content1, content2)
-            return len(commons)
+def get_similaritiy_common_word(filename1: str, filename2: str, preprocess_: bool):
+    if preprocess_:
+        with open(f'{PREPROCESSED_DATA_DIR}{filename1}', 'r') as f1:
+            with open(f'{PREPROCESSED_DATA_DIR}{filename2}', 'r') as f2:
+                content1 = f1.read()
+                content2 = f2.read()
+
+                commons = get_common_words(content1, content2)
+                return len(commons)
+    else:
+        with open(f'{DATA_DIR}{filename1}', 'r') as f1:
+            with open(f'{DATA_DIR}{filename2}', 'r') as f2:
+                content1 = f1.read()
+                content2 = f2.read()
+
+                commons = get_common_words(content1, content2)
+                return len(commons)
 
 def get_most_relevant_mathematicians(similarities: List[Tuple[float, str]], number_of_mathematicians: int = 5):
     res = sorted(similarities, key = lambda x: x[0])[-number_of_mathematicians:]
@@ -90,7 +107,35 @@ def print_result(res):
     for x in res:
         print(x)
 
+def preprocess(text: str):
+    text = text.lower()
+    text = re.sub(punctuation, ' ', text)
+    text = re.sub(regex, '', text)
+    words = word_tokenize(text)
+    words = [word for word in words if len(word) > 1]
+    stop_words = stopwords.words('english')
+    words = [word for word in words if word not in stop_words]
+    stems = [porter.stem(word) for word in words]
+    stems = ' '.join(stems)
+    text = stems
+
+    return text
+
+def preprocess_summaries(input_path:str, output_path:str):
+    filenames = get_file_names(input_path)
+    for filename in filenames:
+        with open(f'{input_path}{filename}', 'r') as f:
+            content = f.read()
+            preprocessed_content = preprocess(content)
+            output = open(f'{output_path}{filename}', 'w+')
+            output.write(preprocessed_content)
+
+
 if __name__ == '__main__':
+    regex = re.compile(r'[^a-z\s]')
+    punctuation = re.compile('[' + string.punctuation + ']')
+    porter = PorterStemmer()
+
     file_exists = isfile(MODEL_FILENAME)
     READ_FROM_STD = False
     if file_exists:
@@ -106,14 +151,14 @@ if __name__ == '__main__':
     #     for s, target_name in similarities:
     #         if target_name == name:
     #             continue
-    #         if s > 0.99999:
+            # if s > 0.99999:
     #             res.append(s)
     #             print(f'\t{target_name}')
     #     print(len(res), name)
     # #     word_vector = model.get_word_vector(query)
 
     filenames = get_file_names(DATA_DIR)
-    MATRIX_SIZE = 100
+    MATRIX_SIZE = 1700
     matrix = np.zeros(len(filenames[:MATRIX_SIZE]) ** 2).astype(int32)
     matrix = matrix.reshape(len(filenames[:MATRIX_SIZE]), len(filenames[:MATRIX_SIZE]))
 
@@ -121,8 +166,8 @@ if __name__ == '__main__':
         for j, filename2 in enumerate(filenames[:MATRIX_SIZE]):
             if i == j:
                 continue
-            s = get_similaritiy_common_word(filename1, filename2)
-            if s > 5:
+            s = get_similaritiy_common_word(filename1, filename2, False)
+            if s > 6:
                 matrix[i][j] = 1
     print(matrix)
     do_ranking(matrix)
