@@ -9,17 +9,35 @@ import string
 from nltk.stem.porter import PorterStemmer
 from nltk import word_tokenize
 from nltk.corpus import stopwords
-
 import fasttext
 import numpy as np
 from numpy import int32, linalg as LA
-
-from ranking import do_ranking
+import networkx as nx
+import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
 
 DATA_DIR = './summary_texts/'
 PREPROCESSED_DATA_DIR = './preprocessed_data/'
 MODEL_FILENAME = 'fasttext_model_summary.bin'
 VECTOR_SIZE = 100
+
+def draw_graph(mat):
+    G = nx.from_numpy_matrix(mat)
+    plt.rcParams["figure.figsize"] = (40, 22)
+    nx.draw_networkx(G)
+    plt.show()
+
+def get_hits(mat):
+    G = nx.from_numpy_matrix(mat)
+    hub, authority = nx.hits(G)
+    return hub, authority
+
+def get_pagerank(mat):
+    G = nx.from_numpy_matrix(mat)
+    pr = nx.pagerank(G, alpha=0.9)
+
+    return pr
 
 def get_common_words(s1:str, s2:str) -> Set[str]:
     str1_words = set(s1.split())
@@ -130,19 +148,42 @@ def preprocess_summaries(input_path:str, output_path:str):
             output = open(f'{output_path}{filename}', 'w+')
             output.write(preprocessed_content)
 
+def rss(centers, matrix, labels):
+    res = 0
+    for i, row in enumerate(matrix):
+        center = centers[labels[i]]
+        res += np.sum(np.square(center- row))
+    return res
+
+def clustering():
+    filenames = get_file_names(DATA_DIR)
+
+    texts = []
+    for filename in filenames:
+        file = open(f'{DATA_DIR}{filename}', 'r')
+        texts.append(file.read())
+        file.close()
+
+    vectorizer = TfidfVectorizer(strip_accents='unicode', stop_words='english')
+    matrix = vectorizer.fit_transform(texts)
+    kmeans = KMeans(n_clusters=10, random_state=0).fit(matrix)
+    centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+    result = rss(centers, matrix.toarray(), labels)
+
 
 if __name__ == '__main__':
-    regex = re.compile(r'[^a-z\s]')
-    punctuation = re.compile('[' + string.punctuation + ']')
-    porter = PorterStemmer()
+    # regex = re.compile(r'[^a-z\s]')
+    # punctuation = re.compile('[' + string.punctuation + ']')
+    # porter = PorterStemmer()
 
-    file_exists = isfile(MODEL_FILENAME)
-    READ_FROM_STD = False
-    if file_exists:
-        model = fasttext.load_model(MODEL_FILENAME)
-    else:
-        model = create_model()
-        model.save_model(MODEL_FILENAME)
+    # file_exists = isfile(MODEL_FILENAME)
+    # READ_FROM_STD = False
+    # if file_exists:
+    #     model = fasttext.load_model(MODEL_FILENAME)
+    # else:
+    #     model = create_model()
+    #     model.save_model(MODEL_FILENAME)
 
     # biography_vectors = get_biographies_vector(model=model)
     # for name in list(biography_vectors.keys()):
@@ -157,17 +198,30 @@ if __name__ == '__main__':
     #     print(len(res), name)
     # #     word_vector = model.get_word_vector(query)
 
-    filenames = get_file_names(DATA_DIR)
-    MATRIX_SIZE = 1700
-    matrix = np.zeros(len(filenames[:MATRIX_SIZE]) ** 2).astype(int32)
-    matrix = matrix.reshape(len(filenames[:MATRIX_SIZE]), len(filenames[:MATRIX_SIZE]))
+    # filenames = get_file_names(DATA_DIR)
+    # MATRIX_SIZE = 1700
+    # matrix = np.zeros(len(filenames[:MATRIX_SIZE]) ** 2).astype(int32)
+    # matrix = matrix.reshape(len(filenames[:MATRIX_SIZE]), len(filenames[:MATRIX_SIZE]))
 
-    for i, filename1 in enumerate(filenames[:MATRIX_SIZE]):
-        for j, filename2 in enumerate(filenames[:MATRIX_SIZE]):
-            if i == j:
-                continue
-            s = get_similaritiy_common_word(filename1, filename2, False)
-            if s > 6    :
-                matrix[i][j] = 1
-    print(matrix)
-    do_ranking(matrix)
+    # for i, filename1 in enumerate(filenames[:MATRIX_SIZE]):
+    #     for j, filename2 in enumerate(filenames[:MATRIX_SIZE]):
+    #         if i == j:
+    #             continue
+    #         s = get_similaritiy_common_word(filename1, filename2, True)
+    #         if s > 6    :
+    #             matrix[i][j] = 1
+
+    # print(matrix)
+    # pr: Dict = get_pagerank(matrix)
+    # hub, auth = get_hits(matrix)
+
+    # for x in list(sorted(list(pr.items()), key=lambda item: item[1], reverse=True))[:10]:
+    #     print(x)
+    # print('*'*20)
+    # for x in list(sorted(list(hub.items()), key=lambda item: item[1], reverse=True))[:10]:
+    #     print(x)
+    # print('*'*20)
+    # for x in list(sorted(list(auth.items()), key=lambda item: item[1], reverse=True))[:10]:
+    #     print(x)
+
+    clustering()
